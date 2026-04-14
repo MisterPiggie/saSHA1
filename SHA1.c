@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint8_t *SHA1_padding(const char *message, size_t length, size_t *padded_length)
+uint8_t *SHA1_padding(const unsigned char *message, size_t length, size_t *padded_length)
 {
-    *padded_length = ((length + 9 + 63) / 64) * 64;
+    *padded_length = ((length + 9) / 64 + 1) * 64;
     uint8_t *padded_buf = calloc(*padded_length, sizeof(uint8_t)); //calloc for zero padding
     if (padded_buf == NULL)
     {
@@ -32,14 +32,13 @@ uint8_t *SHA1_padding(const char *message, size_t length, size_t *padded_length)
 }
 
 
-void SHA1_hash(const char *message, size_t length, uint8_t hash[20])
+void SHA1_hash(const unsigned char *message, size_t length, uint8_t hash[20])
 {
-    size_t *padded_length;
-    uint8_t *padded_buf = SHA1_padding(message, length, padded_length);
+    size_t padded_length, i;
+    uint8_t *padded_buf = SHA1_padding(message, length, &padded_length);
     uint32_t H[5] = {H0, H1, H2, H3, H4};
-    int i;
 
-    for (i = 0; i < *padded_length; i += 64)
+    for (i = 0; i < padded_length; i += 64)
     {
         SHA1_compress_blocks(padded_buf + i, &H[0], &H[1], &H[2], &H[3], &H[4]);
     }
@@ -92,7 +91,7 @@ void SHA1_compress_blocks(uint8_t *padded_buf, uint32_t *A, uint32_t *B, uint32_
 
 uint32_t rotate_left (uint32_t word, int n)
 {
-    return (word << n) | (word >> (32-n));
+    return ((word << n) | (word >> (32-n)));
 }
 
 
@@ -100,7 +99,7 @@ void get_f_and_k_values(int i, uint32_t B_temp, uint32_t C_temp, uint32_t D_temp
 {
     *k = K[i/20];
     if (i<=19)
-        *f_result = (B_temp * C_temp) | (~B_temp & D_temp);
+        *f_result = (B_temp & C_temp) | (~B_temp & D_temp);
     else if (i <= 39)
         *f_result = B_temp ^ C_temp ^ D_temp;
     else if (i <= 59)
