@@ -15,7 +15,6 @@ void SHA1_hash(const unsigned char *message, size_t length, uint8_t hash[20]);
 uint8_t *SHA1_padding(const unsigned char *message, size_t length, size_t *padded_length);
 void SHA1_compress_blocks(uint8_t *padded_buf, uint32_t *A, uint32_t *B,
                           uint32_t *C, uint32_t *D, uint32_t *E);
-void SHA1_compression(char *message, size_t length);
 
 uint32_t rotate_left (uint32_t word, int n);
 void get_f_and_k_values(int i, uint32_t B_temp, uint32_t C_temp, 
